@@ -14,13 +14,16 @@
 
 string8Array file_list();
 
-string8 indexHTML;
+void add_item(string8 *website,string8 *pageName);
+string8 HTMLbegin;
+string8 HTMLend;
 
+#define str string_lit
 
 
 int main()
 {
-  indexHTML = string_lit(
+  HTMLbegin = string_lit(
    "<!DOCTYPE html>\n"
     "<html lang=\"en\">\n"
     "<head>\n"
@@ -31,47 +34,31 @@ int main()
     "</head>\n"
     "<body>\n"
   );
-  // string8_println(indexHTML);
-  // string8 name = string_lit("hellow\n");
-
-
-  // string8_push(&name,'\0');
+  
+  
+  HTMLend = str("</body>");
+  string8 homepage = string8_copy(HTMLend);
+  
   string8Array files = file_list();
-  // string8_println(indexHTML);
   for(usize index = 0; index < files.count ; index++)
   {
-    
-    // string8_println(files.items[index]);
-    // FILE* file= read_file(files.items[index]);
-    
-
-    
-    
     File file ={0};
     make_file(files.items[index], &file);
-    
-    
-    // printf("string %s",file.file_extention.items);
+    string8_println(files.items[index]);
     if (file.state == INVALID)
     {
       string8 msg = string_lit("failed to write");
       string8_println(msg);
-      // fclose(file);
       continue;
     }
 
-    // printf("\n");
     string8 msg2 = string_lit("storm\0");
     string8_println(msg2);
     string8 ext = string_lit("md");
-    string8_push(&ext,'\0');
-    // string8 curr_file_extention = file_extention(files.items[index]);;
-    // string8_println(file.file_extention);
-    if(string8_equals(file.file_extention, ext))
+    if(!string8_equals(file.file_extention, ext))
     {
-      
       string8_println(file.file_extention);
-      continue;;
+      continue;
     }
 
     string8 help = {0};
@@ -80,28 +67,66 @@ int main()
     string8_println(help);
     cmark_node* head = cmark_parse_document(help.items, help.count, CMARK_OPT_DEFAULT);
     
-    string8 print = string_lit( cmark_render_html(head, CMARK_OPT_DEFAULT));
+    
+    string8 content = string_lit( cmark_render_html(head, CMARK_OPT_DEFAULT));
 
-  
-    string8 homepage = string_lit("indexer.html");
-    string8_println(homepage);
 
-    File index = {0};
+    string8 webpage = string8_copy( HTMLbegin);
+    string8_add(&webpage, &content);
+    string8_add(&webpage, &HTMLend);
+    printf("file name");
+    string8_println(file.file_name);    
+
+    string8 postpage_name = string8_copy(file.file_name);
+
+    add_item(&homepage,&postpage_name);
     
-    make_file(homepage, &index);
+    string8 _html = str(".html");
+    string8_add(&postpage_name,&_html);
     
-    File_write(&index, &print);
     
-    string8_println(print);
+    File webFile;
+    make_file(postpage_name, &webFile);
     
+
+    string8_println(postpage_name);
+
+    if(File_write(&webFile, &webpage) == INVALID)
+    {
+      string8_println(string_lit("WRITE FAILED"));
+    }
+    File_write(&webFile,&webpage);
+    
+    string8_println(webpage);
     
     // enl:
     // fclose(file.file);
   }
+  string8_add(&homepage, &HTMLend);
+  File Homepage_html;
+  string8 index_name = string_lit("index.html");
+  make_file(index_name,&Homepage_html );
+  File_write(&Homepage_html, &homepage);
   // string8_println(name);
   return 0;
 }
 
+void add_item(string8 *website,string8 *pageName)
+{
+  
+  string8 before = string_lit(
+      "<li><a href=\"");
+  
+  string8 mid = string_lit(".html\">");
+  string8 after = string_lit(
+      "</li>\n");
+  string8_add(website, &before);
+  string8_add(website, pageName);
+  string8_add(website, &mid);
+  string8pair name = split(*pageName, '/');
+  string8_add(website, &name.second);
+  string8_add(website, &after);
+}
 
 string8Array file_list()
 {
@@ -118,10 +143,16 @@ string8Array file_list()
     while((entry = readdir(dir))!= NULL)
     {
       
-      
+      if (strcmp(entry->d_name , ".") == 0 ||strcmp(entry->d_name ,"..") == 0)
+      {
+        continue;
+      }
+      string8 mes = string_lit(entry->d_name);
+      string8_println(mes);
       string8 prefix_filename = string_lit("Posts/");
       // string8 
       string8 entryName= string_lit(entry->d_name);
+      
       
       string8_println(prefix_filename);
       string8_add(&prefix_filename, &entryName);

@@ -10,6 +10,9 @@
 
 #include "../generics/array.h"
 
+#define PAIR_T string8
+#define PAIR_NAME_T string8pair
+#include "../generics/pair.h"
 // static inline
 string8 string_lit (char* data);
 
@@ -19,7 +22,8 @@ string8 file_extention(string8 file);
 
 void write_file(string8 path, string8 text);
 
-string8 file_name(string8 file);
+string8pair split(string8 str, char n);
+
 FILE* open_file(string8 path);
 
 FILE* open_file_read(string8* Path)
@@ -27,9 +31,9 @@ FILE* open_file_read(string8* Path)
   return fopen(Path->items,"r");
 }
 
-FILE* open_file_write(string8 Path)
+FILE* open_file_write(string8* Path)
 {
-  return fopen(Path.items,"w+");
+  return fopen(Path->items,"w");
 }
 
 void string8_print(string8 string)
@@ -72,7 +76,31 @@ string8 file_extention(string8 file)
   }
   return out;
 }
-string8 file_name(string8 file);
+
+string8pair split(string8 str, char n)
+{
+  string8pair out = {};
+  
+  // out.first = {}; 
+  // out.second = {}; 
+  bool foundChar =false;;
+  for (usize index = 0; index < str.count; index++)
+  {
+    if(foundChar)
+    {
+      string8_push(&out.second, str.items[index]);
+    }
+    else
+    {
+      string8_push(&out.first, str.items[index]);
+    }
+    if(str.items[index] == n)
+    {
+      foundChar = true;
+    }
+  }
+  return out;
+}
 
 
 // void write_file(string8 path, string8 text)

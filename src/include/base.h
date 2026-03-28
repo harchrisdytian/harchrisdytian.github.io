@@ -19,4 +19,12 @@ typedef size_t usize;
 
 typedef float f32;
 
+// TODO(christian) create a good mem system 
+#define ch_malloc(data) malloc(data)
+#define ch_realloc(data,size) realloc( data , size )
+#define ch_free(data) free(data)
+#define ch_memcpy(to,from,size) memcpy( to , from , size)
+
+
+
 #endif // BASE_HEADER
